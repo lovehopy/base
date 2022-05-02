@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.jpa_hjkim.mapper.MemberMapper">
+
+    <resultMap id="MemberResult" type="com.example.jpa_hjkim.entity.MemberResult">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="hobby" property="hobby"/>
+    </resultMap>
+
+    <select id="getMemberAll" resultMap="MemberResult" parameterType="HashMap">
+        SELECT *
+        FROM hjkim.member
+        <where>
+            <if test = 'id != null and id != ""'>AND id = ${id}</if>
+            <if test = 'name != null and name != ""'>AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test = 'age != null and age != ""'>AND age = ${age}</if>
+            <if test = 'hobby != null and hobby != ""'>AND hobby LIKE CONCAT('%', #{hobby}, '%')</if>
+        </where>
+        <if test = 'order != null'>ORDER BY ${order}</if>
+        <if test = 'limit != null and 0 lt limit'>LIMIT #{limit}</if>
+        <if test = 'offset != null'>OFFSET #{offset}</if>
+    </select>
+
+    <select id="getMemberAllTotal" resultType="Integer">
+        SELECT count(*)
+        FROM hjkim.member
+        <where>
+            <if test = 'id != null and id != ""'>AND id = ${id}</if>
+            <if test = 'name != null and name != ""'>AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test = 'age != null and age != ""'>AND age = ${age}</if>
+            <if test = 'hobby != null and hobby != ""'>AND hobby LIKE CONCAT('%', #{hobby}, '%')</if>
+        </where>
+    </select>
+
+
+</mapper>

@@ -1,0 +1,26 @@
+spring:
+  # Thymeleaf Properties
+  thymeleaf:
+    cache: true
+  # Postgres Properties
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://3.37.174.68:5432/test
+    username: postgres
+    password: postgres
+
+  # JPA properties
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+      database: postgresql
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+      generate-ddl: true
+      format_sql: true
+
+# Mybatis Properties
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  map-underscore-to-camel-case: true
+
