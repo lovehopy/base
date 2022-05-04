@@ -21,16 +21,6 @@
         let table;
         let stompClient;
 
-        function subscribeStomp(stompClient, sessionId, line) {
-            stompClient.subscribe('/topic/'+sessionId+'/'+line, function (messageOutput) {
-                findLine(JSON.parse(messageOutput.body),line);
-                stompClient.subscribe('/topic/'+line, function(messageOutput) {
-                    findLine(JSON.parse(messageOutput.body),line)
-                });
-            });
-            stompClient.send("/app/firstConnection", {}, line);
-        }
-
         $(document).ready(function() {
 
             let socket = new SockJS('/ws');
@@ -43,21 +33,10 @@
                     console.error("data:::",data);
                     alert(data.body);
                 });
-                stomp.send('/publish/message', {}, JSON.stringify({msg:'test msg'}))
+                stompClient.send('/publish/message/enter', {});
+                stompClient.send('/publish/message', {}, JSON.stringify({msg:'test msg'}));
             });
 
-            const checkWSClosed = function(){
-                setTimeout(function(){
-                    if (stompClient.ws.readyState == SockJS.CLOSED) {
-                        console.error("web socket이 닫혀있습니다 :::", stompClient.ws.readyState);
-                        setTimeout(function(){location.reload();},30000);
-                    } else {
-                        checkWSClosed();
-                    }
-                }, 5000);
-            };
-
-            checkWSClosed();
 
             // $('#example tfoot th').each( function () {
             //     var title = $(this).text();
