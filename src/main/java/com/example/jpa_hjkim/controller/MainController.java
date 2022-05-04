@@ -28,4 +28,11 @@ public class MainController {
         return "menu/querydsl";
     }
 
+    @GetMapping("/kafka")
+    public String kafka(Model model){
+        model.addAttribute("headLine","project");
+        model.addAttribute("subHeadLine","kafka");
+        return "menu/kafka";
+    }
+
 }

@@ -1,15 +1,14 @@
 spring:
-  # Thymeleaf Properties
+#thymeleaf
   thymeleaf:
     cache: true
-  # Postgres Properties
+#postgres
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://3.37.174.68:5432/test
     username: postgres
     password: postgres
-
-  # JPA properties
+#jpa
   jpa:
     show-sql: true
     hibernate:
@@ -19,8 +18,27 @@ spring:
       generate-ddl: true
       format_sql: true
 
-# Mybatis Properties
+#kafka
+  kafka:
+    consumer:
+      bootstrap-servers: 10.10.15.112:9092
+      group-id: hjkim
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+    producer:
+      bootstrap-servers: 10.10.15.112:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    listener:
+      ack-mode: manual_immediate
+#mybatis
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   map-underscore-to-camel-case: true
+#tcp socket
+tcp:
+  server:
+    port: 10091
 

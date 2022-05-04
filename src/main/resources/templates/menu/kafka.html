@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{/layout/default}">
+
+<th:block layout:fragment="css">
+    <!--/* datatable */-->
+    <link rel="stylesheet" media="screen, print" th:href="@{/css/datagrid/datatables/datatables.bundle.css}">
+    <!--/* custom css */-->
+    <link id="base" rel="stylesheet" media="screen, print" th:href="@{/css/base.css}">
+    <!--    <link rel="stylesheet" type="text/css" th:href="@{DataTables/datatables.min.css}"/>-->
+</th:block>
+<!-- index.html 고유 스크립트 추가 -->
+<th:block layout:fragment="script">
+    <!--/* datatable */-->
+    <script th:src="@{/js/datagrid/datatables/datatables.bundle.js}"></script>
+    <script th:src="@{/js/datagrid/datatables/datatables.export.js}"></script>
+    <!--/* socket */-->
+    <script src="/webjars/sockjs-client/1.1.2/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/2.3.3/stomp.min.js"></script>
+    <script th:inline="javascript">
+
+        let table;
+        let stompClient;
+
+        function subscribeStomp(stompClient, sessionId, line) {
+            stompClient.subscribe('/topic/'+sessionId+'/'+line, function (messageOutput) {
+                findLine(JSON.parse(messageOutput.body),line);
+                stompClient.subscribe('/topic/'+line, function(messageOutput) {
+                    findLine(JSON.parse(messageOutput.body),line)
+                });
+            });
+            stompClient.send("/app/firstConnection", {}, line);
+        }
+
+        $(document).ready(function() {
+
+            let socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket, {debug: false});
+
+            let sessionId = "hj";
+
+            stompClient.connect({}, function () {
+                stompClient.subscribe('/subscribe/message', function (data) {
+                    console.error("data:::",data);
+                    alert(data.body);
+                });
+                stomp.send('/publish/message', {}, JSON.stringify({msg:'test msg'}))
+            });
+
+            const checkWSClosed = function(){
+                setTimeout(function(){
+                    if (stompClient.ws.readyState == SockJS.CLOSED) {
+                        console.error("web socket이 닫혀있습니다 :::", stompClient.ws.readyState);
+                        setTimeout(function(){location.reload();},30000);
+                    } else {
+                        checkWSClosed();
+                    }
+                }, 5000);
+            };
+
+            checkWSClosed();
+
+            // $('#example tfoot th').each( function () {
+            //     var title = $(this).text();
+            //     $(this).html( '<input type="text" class="form-control" placeholder="Search '+title+'" />' );
+            // } );
+
+            //초기세팅
+            table = $('#example').DataTable({
+                responsive: true,
+                pageLength: 10,
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '/selectByJpa',
+                    // url: '/select',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: function(d){
+                        let inputName = d.search.value;
+                        Object.assign(d,{"bespokeParams": {"name":inputName}});
+                        console.error(">>> d >>>", d)
+                        return JSON.stringify(d);
+                    }
+                },
+                language: {
+                    "emptyTable": "NO DATA"
+                },
+                columns : [
+                    {data: "id"},
+                    {data: "name"},
+                    {data: "age"},
+                    {data: "hobby"}
+                ],
+                initComplete: function () {
+                    // Apply the search
+                    // this.api().columns().every( function () {
+                    //     var that = this;
+                    //     $('input', this.footer()).on('keyup', function(key){
+                    //         if(key.keyCode==13){
+                    //             if(that.search() !== this.value){
+                    //                 that
+                    //                     .search(this.value)
+                    //                     .draw();
+                    //             }
+                    //         }
+                    //     } );
+                    // } );
+                }
+            });
+
+            $('#button-addon2').on("click", function(){
+                table.ajax.reload();
+            });
+
+        } );
+    </script>
+</th:block>
+
+<main layout:fragment="content" id="js-page-content" role="main" class="page-content">
+    <ol class="breadcrumb page-breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0);"><span th:text="${headLine}"></span></a></li>
+        <li class="breadcrumb-item active"><span th:text="${subHeadLine}"></span></li>
+        <li class="position-absolute pos-top pos-right d-none d-sm-block"><span class="js-get-date"></span></li>
+    </ol>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel">
+                <div class="panel-hdr">
+                    <h2>
+                        <span th:text="${subHeadLine}"></span>
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="form-group">
+                            <label class="form-label" for="example-textarea">Text area</label>
+                            <textarea class="form-control" id="example-textarea" rows="5"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</html>
